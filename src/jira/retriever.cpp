@@ -2,6 +2,7 @@
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 #include <libstein.h>
+#include <exception>
 
 #include "retriever.h"
 
@@ -47,9 +48,10 @@ Retriever::Retriever (std::string user,
         }
         else
         {
-            //TODO RAII exception instead
-            fmt::print("{}:{}\n", response.status_code, response.text);
-            break;
+            throw std::invalid_argument(
+                nlohmann::json::parse(
+                    fmt::format("{{\"status_code\": {}, \"response\": {}}}", response.status_code, response.text)
+                ).dump(2));
         }
     }
 }

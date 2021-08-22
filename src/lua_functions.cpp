@@ -1,7 +1,7 @@
 #include "lua_functions.h"
 #include "jira/jira.h"
 
-#include <fmt/core.h>
+#include <fmt/color.h>
 #include <string>
 
 static int lua_print(lua_State *lua_state)
@@ -28,26 +28,35 @@ namespace JiraTable
         }
 
         // Initialize a new resource shared pointer.
-        const char* jql = lua_tostring(state, 1);
-        auto jira = std::make_shared<Jira>(jql);
-
-        // The shared space with Lua needs to be specifically allocated this way:
-        void *user_data = lua_newuserdata(state, sizeof(std::shared_ptr<Jira>));
-
-        // TODO allocation failure should issue an jira_error.
-        if (!user_data)
+        try
         {
-            return 0;
+            const char* jql = lua_tostring(state, 1);
+            auto jira = std::make_shared<Jira>(jql);
+
+            // The shared space with Lua needs to be specifically allocated this way:
+            void *user_data = lua_newuserdata(state, sizeof(std::shared_ptr<Jira>));
+
+            // TODO allocation failure should issue an jira_error.
+            if (!user_data)
+            {
+                return 0;
+            }
+
+            // The "placement new operator" will create the object on the preallocated memory.
+            new(user_data) std::shared_ptr<Jira>(jira);
+
+            // Now just set the metatable on this new object
+            luaL_getmetatable(state, "Jira");
+            lua_setmetatable(state, -2);
+
+            return 1;
+        }
+        catch(const std::exception& e)
+        {
+            fmt::print(fg(fmt::color::red), "{}\n", e.what());
         }
 
-        // The "placement new operator" will create the object on the preallocated memory.
-        new(user_data) std::shared_ptr<Jira>(jira);
-
-        // Now just set the metatable on this new object
-        luaL_getmetatable(state, "Jira");
-        lua_setmetatable(state, -2);
-
-        return 1;
+        return 0;
     }
 
     int destroy(lua_State* state)
