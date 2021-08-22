@@ -15,6 +15,8 @@ public:
     std::string jira_key;
     std::string jira_server;
 
+    bool verbose = true;
+
     Settings (Settings const&) = delete;
     void operator= (Settings const&) = delete;
 

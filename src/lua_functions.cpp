@@ -1,8 +1,9 @@
-#include "lua_functions.h"
-#include "jira/jira.h"
-
-#include <fmt/color.h>
 #include <string>
+#include <fmt/color.h>
+
+#include "lua_functions.h"
+#include "settings.h"
+#include "jira/jira.h"
 
 static int lua_print(lua_State *lua_state)
 {
@@ -22,8 +23,10 @@ namespace JiraTable
     int create(lua_State* state)
     {
         // The argument is the JQL used in RAII.
-        if(!lua_isstring(state, 1))
+        // if(1 != lua_isstring(state, 1))
+        if (lua_type(state, 1) != LUA_TSTRING)
         {
+            fmt::print(fg(fmt::color::light_salmon), "Usage: Jira.Create(string: jql command)\n");
             return luaL_typeerror(state, 1, "string");
         }
 
@@ -36,9 +39,10 @@ namespace JiraTable
             // The shared space with Lua needs to be specifically allocated this way:
             void *user_data = lua_newuserdata(state, sizeof(std::shared_ptr<Jira>));
 
-            // TODO allocation failure should issue an jira_error.
+            // Throw an allocation if memory
             if (!user_data)
             {
+                fmt::print(fg(fmt::color::red), "Not enough memory.");
                 return 0;
             }
 
@@ -49,9 +53,16 @@ namespace JiraTable
             luaL_getmetatable(state, "Jira");
             lua_setmetatable(state, -2);
 
+            if (Settings::get_instance().verbose)
+            {
+                fmt::print(fg(fmt::color::light_green),
+                           "Successfully loaded {} keys.", jira->get_keys().length());
+                fmt::print("\n");
+            }
+
             return 1;
         }
-        catch(const std::exception& e)
+        catch(const std::invalid_argument& e)
         {
             fmt::print(fg(fmt::color::red), "{}\n", e.what());
         }
