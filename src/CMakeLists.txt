@@ -1,4 +1,5 @@
 find_package(fmt CONFIG REQUIRED)
+find_library(LIB_CPR cpr)
 
 #----- Include LibStein
 include(FetchContent)
@@ -10,17 +11,22 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(LibStein)
 include_directories(${LibStein_SOURCE_DIR}/include)
 
-add_library(${PROJECT_NAME}_lib "")
+# add_library(${PROJECT_NAME}_lib "")
 
-target_sources(${PROJECT_NAME}_lib PUBLIC
-    jira/jira.cpp)
+# target_sources(${PROJECT_NAME}_lib PUBLIC
+#     jira/jira.cpp)
 
 add_executable(${PROJECT_NAME}
-    main.cpp)
+    main.cpp
+    lua_functions.cpp
+    settings.cpp
+    jira/jira.cpp
+    jira/retriever.cpp)
 
 target_link_libraries(${PROJECT_NAME}
     LINK_PUBLIC
+    ${LIB_CPR}
     fmt::fmt
     LibStein
-    lua
-    ${PROJECT_NAME}_lib)
+    lua)
+    # ${PROJECT_NAME}_lib)

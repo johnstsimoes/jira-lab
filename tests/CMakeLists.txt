@@ -6,7 +6,7 @@ add_executable(${CMAKE_PROJECT_NAME}_tst
                 basic_tests.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}_tst
-                      ${CMAKE_PROJECT_NAME}_lib
+                    #   ${CMAKE_PROJECT_NAME}_lib
                       GTest)
 
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${CMAKE_PROJECT_NAME}_tst)

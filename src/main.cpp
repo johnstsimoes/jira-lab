@@ -9,18 +9,7 @@ extern "C"
 #include <lua/lualib.h>
 }
 
-static int lua_print(lua_State *lua_state)
-{
-    std::string str = lua_tostring(lua_state, 1);
-    fmt::print("{}\n", str);
-    return 0;
-}
-
-static int lua_exit(lua_State *lua_state)
-{
-    exit(EXIT_SUCCESS);
-    return 0;
-}
+#include "lua_functions.h"
 
 int main(void)
 {
@@ -30,22 +19,20 @@ int main(void)
                "Jira Lab v0.1");
     fmt::print("\n2021 John Simoes\n\n");
 
+    // Initialize Lua VM context.
     lua_State *lua_state = luaL_newstate();
 
-    static const luaL_Reg lualibs[] = {
-        { "base", luaopen_base },
-        { NULL, NULL}
-    };
+    // Load all default libraries on Lua.
+    luaL_openlibs (lua_state);
 
-    lua_pushcfunction(lua_state, lua_print);
-    lua_setglobal(lua_state, "print");
+    register_lua_functions (lua_state);
 
-    lua_pushcfunction(lua_state, lua_exit);
-    lua_setglobal(lua_state, "exit");
-
+    /*
+     * Read standard input and execute each line in Lua VM.
+     */
     for (std::string line; std::getline(std::cin, line);)
     {
-        int error = luaL_loadbuffer(lua_state, line.c_str(), line.length(), "line") ||
+        int error = luaL_loadstring(lua_state, line.c_str()) ||
                     lua_pcall(lua_state, 0, 0, 0);
 
         if (error)
