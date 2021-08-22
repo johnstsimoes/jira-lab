@@ -5,21 +5,26 @@ A Lua-powered sandbox to perform Jira operations.
 ## Usage
 
 ```
-jira-lab << luascript.lua
+jira-lab                      # Will enter interactive mode
+```
+Or if you want to execute a Lua script (like `luascript.lua` below):
+
+```
+cat luascript.lua | jira-lab
 ```
 
-The following environment variables must be set:
+The following environment variables *must be set*:
 
 * JIRA-USER: your username on Atlassian Jira.
 * JIRA-TOKEN: an API token.
 * JIRA-HOST: the address of your Jira instance.
 
-The script below will print out the number of Jira tickets:
+The script below will print out the keys resulting from a JQL query:
 
 luascript.lua
 ```
-keys = jql ("project in (TEST) and created > -10d")
-print (keys.length())
+jira = Jira.Create ("project in (TEST) and created > -10d")
+print (Jira.GetKeys(jira))
 ```
 
 ## Building
