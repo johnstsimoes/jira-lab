@@ -17,6 +17,8 @@ public:
 
     bool verbose = true;
 
+    // int delay_ms = 400; // TODO implement delay to avoid blacklisting
+
     Settings (Settings const&) = delete;
     void operator= (Settings const&) = delete;
 

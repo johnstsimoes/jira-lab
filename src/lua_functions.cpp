@@ -20,24 +20,24 @@ static int lua_exit(lua_State *lua_state)
 
 namespace JiraTable
 {
-    int create(lua_State* state)
+    int create(lua_State* lua_state)
     {
         // The argument is the JQL used in RAII.
-        // if(1 != lua_isstring(state, 1))
-        if (lua_type(state, 1) != LUA_TSTRING)
+        // if(1 != lua_isstring(lua_state, 1))
+        if (lua_type(lua_state, 1) != LUA_TSTRING)
         {
             fmt::print(fg(fmt::color::light_salmon), "Usage: Jira.Create(string: jql command)\n");
-            return luaL_typeerror(state, 1, "string");
+            return luaL_typeerror(lua_state, 1, "string");
         }
 
         // Initialize a new resource shared pointer.
         try
         {
-            const char* jql = lua_tostring(state, 1);
+            const char* jql = lua_tostring(lua_state, 1);
             auto jira = std::make_shared<Jira>(jql);
 
             // The shared space with Lua needs to be specifically allocated this way:
-            void *user_data = lua_newuserdata(state, sizeof(std::shared_ptr<Jira>));
+            void *user_data = lua_newuserdata(lua_state, sizeof(std::shared_ptr<Jira>));
 
             // Throw an allocation if memory
             if (!user_data)
@@ -50,13 +50,13 @@ namespace JiraTable
             new(user_data) std::shared_ptr<Jira>(jira);
 
             // Now just set the metatable on this new object
-            luaL_getmetatable(state, "Jira");
-            lua_setmetatable(state, -2);
+            luaL_getmetatable(lua_state, "Jira");
+            lua_setmetatable(lua_state, -2);
 
             if (Settings::get_instance().verbose)
             {
                 fmt::print(fg(fmt::color::light_green),
-                           "Successfully loaded {} keys.", jira->get_keys().length());
+                           "Successfully loaded {} keys.", jira->get_keys().size());
                 fmt::print("\n");
             }
 
@@ -70,9 +70,9 @@ namespace JiraTable
         return 0;
     }
 
-    int destroy(lua_State* state)
+    int destroy(lua_State* lua_state)
     {
-        void* jira_reference = luaL_checkudata(state, 1, "Jira");
+        void* jira_reference = luaL_checkudata(lua_state, 1, "Jira");
 
         if (jira_reference)
         {
@@ -83,14 +83,30 @@ namespace JiraTable
         return 0;
     }
 
-    int get_keys(lua_State* state)
+    int get_keys(lua_State* lua_state)
     {
-        void* jira_reference = luaL_checkudata(state, 1, "Jira");
+        void* jira_reference = luaL_checkudata(lua_state, 1, "Jira");
 
         if (jira_reference)
         {
             auto jira = static_cast<std::shared_ptr<Jira>*>(jira_reference);
-            lua_pushstring(state, (*jira)->get_keys().c_str());
+
+            lua_newtable(lua_state);
+
+            int index = 0;
+
+            auto keys = (*jira)->get_keys();
+
+            for (const auto& key : keys)
+            {
+                // lua_pushstring(L, row->date);
+                // lua_setfield(L, -2, "date");
+
+                lua_pushinteger(lua_state, index++);
+                lua_pushstring(lua_state, key.c_str());
+                lua_settable(lua_state, -3);
+            }
+
             return 1;
         }
 

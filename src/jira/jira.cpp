@@ -15,15 +15,7 @@ Jira::Jira(const std::string &jql)
     this->keys_ = retriever.get_results();
 }
 
-std::string Jira::get_keys()
+std::vector<std::string> Jira::get_keys()
 {
-    std::string result;
-
-    for (const auto& key : this->keys_)
-    {
-        result += key;
-        result += ", ";
-    }
-
-    return result;
+    return this->keys_;
 }

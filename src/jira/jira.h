@@ -11,5 +11,5 @@ class Jira
 public:
     Jira(const std::string &jql);
 
-    std::string get_keys();
+    std::vector<std::string> get_keys();
 };

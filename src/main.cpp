@@ -30,16 +30,46 @@ int main(void)
     /*
      * Read standard input and execute each line in Lua VM.
      */
-    for (std::string line; std::getline(std::cin, line);)
-    {
-        int error = luaL_loadstring(lua_state, line.c_str()) ||
-                    lua_pcall(lua_state, 0, 0, 0);
+    bool multi = false;
+    std::string line;
 
-        if (error)
+    fmt::print("{}", (multi? ">>" : ">"));
+
+    std::string multiline_buffer = "";
+
+    while (std::getline(std::cin, line))
+    {
+        multiline_buffer += line;
+
+        int error = luaL_loadstring(lua_state, multiline_buffer.c_str());
+
+        if (error != LUA_ERRSYNTAX)
         {
-            fmt::print(fg(fmt::color::red), "{}\n", lua_tostring(lua_state, -1));
-            lua_pop(lua_state, 1);
+            lua_pcall(lua_state, 0, LUA_MULTRET, 0);
+            multi = false;
+            multiline_buffer = "";
         }
+        else
+        {
+            std::string error_message = lua_tostring(lua_state, -1);
+
+            // Lua "waiting for more" errors always end with "<eof>".
+            if (error_message.rfind("<eof>") == error_message.length() - 5)
+            {
+                multi = true;
+                multiline_buffer += "\n";
+            }
+            else
+            {
+                fmt::print("len:{}, eof_found:{}\n", error_message.length(), error_message.rfind("<eof>"));
+                multi = false;
+                multiline_buffer = "";
+
+                fmt::print(fg(fmt::color::red), "{}\n", error_message);
+            }
+        }
+
+        fmt::print("{}", (multi? ">>" : ">"));
     }
 
     lua_close(lua_state);
