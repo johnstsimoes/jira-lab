@@ -18,8 +18,9 @@ include_directories(${LibStein_SOURCE_DIR}/include)
 
 add_executable(${PROJECT_NAME}
     main.cpp
-    lua_functions.cpp
+    util.cpp
     settings.cpp
+    lua_jql.cpp
     jira/jira.cpp
     jira/retriever.cpp)
 

@@ -7,4 +7,8 @@ extern "C"
 #include <lua/lualib.h>
 }
 
-void register_lua_functions (lua_State *lua_state);
+class LuaJQL
+{
+public:
+    static void register_functions(lua_State* lua_state);
+};

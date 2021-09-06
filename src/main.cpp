@@ -12,7 +12,8 @@ extern "C"
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include "lua_functions.h"
+#include "util.h"
+#include "lua_jql.h"
 
 int main(void)
 {
@@ -31,7 +32,9 @@ int main(void)
     // Load all default libraries on Lua.
     luaL_openlibs (lua_state);
 
-    register_lua_functions (lua_state);
+    LuaJQL::register_functions(lua_state);
+
+    // register_lua_functions (lua_state);
 
     /*
      * Read standard input and execute each line in Lua VM.
@@ -52,11 +55,23 @@ int main(void)
 
         multiline_buffer += line;
 
+        // If starts with "=", wrap with print().
+        if (!multi && multiline_buffer.find("=") == 0)
+        {
+            multiline_buffer.replace(0, 1, "print(");
+            multiline_buffer += ")";
+        }
+
         int error = luaL_loadstring(lua_state, multiline_buffer.c_str());
 
         if (error != LUA_ERRSYNTAX)
         {
-            lua_pcall(lua_state, 0, LUA_MULTRET, 0);
+            int result = lua_pcall(lua_state, 0, LUA_MULTRET, 0);
+            if (result != LUA_OK)
+            {
+                print_error(lua_tostring(lua_state, -1));
+            }
+
             multi = false;
             multiline_buffer = "";
         }
@@ -75,7 +90,7 @@ int main(void)
                 multi = false;
                 multiline_buffer = "";
 
-                fmt::print(fg(fmt::color::red), "{}\n", error_message);
+                print_error(error_message);
             }
         }
 
