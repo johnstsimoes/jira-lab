@@ -12,4 +12,5 @@ public:
     Jira(const std::string &jql);
 
     std::vector<std::string> get_keys();
+    int get_count();
 };

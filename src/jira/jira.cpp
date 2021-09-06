@@ -19,3 +19,8 @@ std::vector<std::string> Jira::get_keys()
 {
     return this->keys_;
 }
+
+int Jira::get_count()
+{
+    return this->keys_.size();
+}

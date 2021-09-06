@@ -12,6 +12,11 @@ static int lua_print(lua_State *lua_state)
     return 0;
 }
 
+static void print_error(const std::string &error_message)
+{
+    fmt::print(fg(fmt::color::red), "{}\n", error_message);
+}
+
 static int lua_exit(lua_State *lua_state)
 {
     exit(EXIT_SUCCESS);
@@ -109,6 +114,30 @@ namespace JiraTable
 
             return 1;
         }
+        else
+        {
+            print_error("Object not found.");
+        }
+
+        return 0;
+    }
+
+    int get_count(lua_State* lua_state)
+    {
+        void* jira_reference = luaL_checkudata(lua_state, 1, "Jira");
+
+        if (jira_reference)
+        {
+            auto jira = static_cast<std::shared_ptr<Jira>*>(jira_reference);
+
+            lua_pushinteger(lua_state, (*jira)->get_count());
+
+            return 1;
+        }
+        else
+        {
+            print_error("Object not found.");
+        }
 
         return 0;
     }
@@ -130,7 +159,8 @@ void register_lua_functions (lua_State *lua_state)
     {
         {"Create", JiraTable::create},
         {"__gc", JiraTable::destroy},
-        {"GetKeys", JiraTable::get_keys},
+        {"Keys", JiraTable::get_keys},
+        {"Count", JiraTable::get_count},
         {NULL, NULL}
     };
 

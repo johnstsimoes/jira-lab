@@ -20,10 +20,10 @@ int main(void)
                bg(fmt::color::green) |
                fmt::emphasis::bold,
                "Jira Lab v0.1");
-    fmt::print("\n2021 John Simoes\n\n");
+    fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
 
     // Avoid file tab completion.
-    // rl_bind_key('\t', rl_insert);
+    rl_bind_key('\t', rl_insert);
 
     // Initialize Lua VM context.
     lua_State *lua_state = luaL_newstate();

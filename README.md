@@ -11,20 +11,28 @@ Or if you want to execute a Lua script (like `luascript.lua` below):
 
 ```
 cat luascript.lua | jira-lab
+
+jira-lab < luascript.lua
 ```
 
 The following environment variables *must be set*:
 
-* JIRA-USER: your username on Atlassian Jira.
-* JIRA-TOKEN: an API token.
-* JIRA-HOST: the address of your Jira instance.
+* JIRA_USER: your username on Atlassian Jira.
+* JIRA_TOKEN: an API token.
+* JIRA_HOST: the address of your Jira instance.
 
 The script below will print out the keys resulting from a JQL query:
 
 luascript.lua
 ```
 jira = Jira.Create ("project in (TEST) and created > -10d")
-print (Jira.GetKeys(jira))
+keys = Jira.Keys(jira)
+
+total = Jira.Count(jira)
+
+for i=0,total-1 do
+  print (keys[i])
+end
 ```
 
 ## Building
