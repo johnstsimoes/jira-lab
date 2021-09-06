@@ -1,28 +1,28 @@
-#include <fmt/core.h>
+#include <libstein.h>
+
+#include <fmt/format.h>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
-#include <libstein.h>
-#include <exception>
 
-#include "retriever.h"
+#include "../settings.h"
+#include "jql.h"
 
-Retriever::Retriever (std::string user,
-                      std::string token,
-                      std::string host,
-                      std::string jql)
+JQL::JQL(const std::string &jql)
 {
+    auto &settings = Settings::get_instance();
+
     int position = 0;
     bool more_pages = true;
 
     while (more_pages)
     {
         auto url = fmt::format("{}/rest/api/2/search?jql={}&fields=key&startAt={}",
-            host,
+            settings.jira_server,
             libstein::stringutils::url_encode(jql),
             position);
 
         cpr::Response response = cpr::Get(cpr::Url{url},
-                        cpr::Authentication{user, token});
+                        cpr::Authentication{settings.jira_user, settings.jira_key});
 
         if (response.status_code == 200)
         {
@@ -30,7 +30,7 @@ Retriever::Retriever (std::string user,
 
             for (const auto& issue : json["issues"])
             {
-                results_.push_back( issue["key"]);
+                keys_.push_back( issue["key"]);
             }
 
             int startAt = json["startAt"];
@@ -56,7 +56,7 @@ Retriever::Retriever (std::string user,
     }
 }
 
-std::vector<std::string> Retriever::get_results() const
+std::vector<std::string> JQL::get_keys()
 {
-    return results_;
+    return this->keys_;
 }

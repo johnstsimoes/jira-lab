@@ -21,8 +21,7 @@ add_executable(${PROJECT_NAME}
     util.cpp
     settings.cpp
     lua_jql.cpp
-    jira/jira.cpp
-    jira/retriever.cpp)
+    jira/jql.cpp)
 
 target_link_libraries(${PROJECT_NAME}
     LINK_PUBLIC
