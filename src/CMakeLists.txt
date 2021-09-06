@@ -28,5 +28,6 @@ target_link_libraries(${PROJECT_NAME}
     ${LIB_CPR}
     fmt::fmt
     LibStein
+    readline
     lua)
     # ${PROJECT_NAME}_lib)

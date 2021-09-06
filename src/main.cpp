@@ -9,6 +9,9 @@ extern "C"
 #include <lua/lualib.h>
 }
 
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include "lua_functions.h"
 
 int main(void)
@@ -18,6 +21,9 @@ int main(void)
                fmt::emphasis::bold,
                "Jira Lab v0.1");
     fmt::print("\n2021 John Simoes\n\n");
+
+    // Avoid file tab completion.
+    // rl_bind_key('\t', rl_insert);
 
     // Initialize Lua VM context.
     lua_State *lua_state = luaL_newstate();
@@ -31,14 +37,19 @@ int main(void)
      * Read standard input and execute each line in Lua VM.
      */
     bool multi = false;
-    std::string line;
-
-    fmt::print("{}", (multi? ">>" : ">"));
 
     std::string multiline_buffer = "";
 
-    while (std::getline(std::cin, line))
+    char* readline_buffer;
+
+    while ( (readline_buffer = readline(multi? ">>" : ">")) != nullptr)
     {
+        // Use readline history and delete the allocated memory.
+        std::string line = readline_buffer;
+        if (strlen(readline_buffer) > 0)
+            add_history(readline_buffer);
+        free(readline_buffer);
+
         multiline_buffer += line;
 
         int error = luaL_loadstring(lua_state, multiline_buffer.c_str());
@@ -61,7 +72,6 @@ int main(void)
             }
             else
             {
-                fmt::print("len:{}, eof_found:{}\n", error_message.length(), error_message.rfind("<eof>"));
                 multi = false;
                 multiline_buffer = "";
 
@@ -69,7 +79,7 @@ int main(void)
             }
         }
 
-        fmt::print("{}", (multi? ">>" : ">"));
+        lua_settop(lua_state, 0);
     }
 
     lua_close(lua_state);
