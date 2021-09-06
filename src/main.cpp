@@ -13,7 +13,7 @@ extern "C"
 #include <readline/history.h>
 
 #include "util.h"
-#include "lua_jql.h"
+#include "lua_jira.h"
 
 int main(void)
 {
@@ -32,7 +32,7 @@ int main(void)
     // Load all default libraries on Lua.
     luaL_openlibs (lua_state);
 
-    LuaJQL::register_functions(lua_state);
+    LuaJira::register_functions(lua_state);
 
     // register_lua_functions (lua_state);
 

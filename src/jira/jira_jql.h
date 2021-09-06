@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 
-class JQL
+class JiraJQL
 {
     std::vector<std::string> keys_;
 
 public:
-    JQL(const std::string &jql);
+    JiraJQL(const std::string &jql);
 
     std::vector<std::string> get_keys();
 };

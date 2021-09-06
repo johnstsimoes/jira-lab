@@ -16,6 +16,7 @@ public:
     std::string jira_server;
 
     bool verbose = true;
+    bool debug = false;
 
     // int delay_ms = 400; // TODO implement delay to avoid blacklisting
 

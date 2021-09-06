@@ -7,7 +7,7 @@ extern "C"
 #include <lua/lualib.h>
 }
 
-class LuaJQL
+class LuaJira
 {
 public:
     static void register_functions(lua_State* lua_state);

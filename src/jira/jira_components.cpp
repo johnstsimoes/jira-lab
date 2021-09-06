@@ -1,13 +1,11 @@
-#include <libstein.h>
-
 #include <fmt/format.h>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 
 #include "../settings.h"
-#include "jql.h"
+#include "jira_components.h"
 
-JQL::JQL(const std::string &jql)
+JiraComponents::JiraComponents(const std::string &project_name)
 {
     auto &settings = Settings::get_instance();
 
@@ -16,9 +14,9 @@ JQL::JQL(const std::string &jql)
 
     while (more_pages)
     {
-        auto url = fmt::format("{}/rest/api/2/search?jql={}&fields=key&startAt={}",
+        auto url = fmt::format("{}/rest/api/2/project/{}/component?startAt={}",
             settings.jira_server,
-            libstein::stringutils::url_encode(jql),
+            project_name,
             position);
 
         cpr::Response response = cpr::Get(cpr::Url{url},
@@ -28,23 +26,16 @@ JQL::JQL(const std::string &jql)
         {
             auto json = nlohmann::json::parse(response.text);
 
-            for (const auto& issue : json["issues"])
+            for (const auto& entry : json["values"])
             {
-                keys_.push_back( issue["key"]);
+                components_.push_back( entry["name"]);
             }
 
             int startAt = json["startAt"];
-            int total = json["total"];
-            int issues = json["issues"].size();
+            int retrieved = json["values"].size();
 
-            if (startAt + issues >= total)
-            {
-                more_pages = false;
-            }
-            else
-            {
-                position += issues;
-            }
+            more_pages = !(json["isLast"]);
+            position += retrieved;
         }
         else
         {
@@ -56,7 +47,7 @@ JQL::JQL(const std::string &jql)
     }
 }
 
-std::vector<std::string> JQL::get_keys()
+std::vector<std::string> JiraComponents::get_results()
 {
-    return this->keys_;
+    return this->components_;
 }
