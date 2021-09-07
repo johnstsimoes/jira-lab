@@ -26,9 +26,7 @@ The script below will print out the keys resulting from a JQL query:
 luascript.lua
 ```
 -- List all keys of tickets created in project TEST on the last 10 days
-result = JQL.Create ("project in (TEST) and created > -10d")
-
-keys = JQL.Keys(result)
+keys = Jira.JQL ("project in (TEST) and created > -10d")
 
 for i=1, #keys do     -- conventionally, Lua indexes starts at 1.
   print (keys[i])
