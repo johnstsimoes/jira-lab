@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../settings.h"
+#include "../util.h"
 #include "jira_jql.h"
 
 JiraJQL::JiraJQL(const std::string &jql)
@@ -14,8 +15,12 @@ JiraJQL::JiraJQL(const std::string &jql)
     int position = 0;
     bool more_pages = true;
 
+    ProgressBar progress;
+
     while (more_pages)
     {
+        progress.tick();
+
         auto url = fmt::format("{}/rest/api/2/search?jql={}&fields=key&startAt={}",
             settings.jira_server,
             libstein::stringutils::url_encode(jql),

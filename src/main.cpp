@@ -15,12 +15,24 @@ extern "C"
 #include "util.h"
 #include "lua_jira.h"
 
+char* get_prompt(lua_State *lua_state, bool multi)
+{
+    static char buffer[256];
+
+    int used_memory = lua_gc(lua_state, LUA_GCCOUNT, 0);
+
+    sprintf(buffer, "[%d kb]%s", used_memory, (multi? ">>": ">"));
+
+    return buffer;
+}
+
 int main(void)
 {
     fmt::print(fg(fmt::color::light_green) |
                bg(fmt::color::green) |
                fmt::emphasis::bold,
                "Jira Lab v0.1");
+
     fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
 
     // Avoid file tab completion.
@@ -45,7 +57,7 @@ int main(void)
 
     char* readline_buffer;
 
-    while ( (readline_buffer = readline(multi? ">>" : ">")) != nullptr)
+    while ( (readline_buffer = readline(get_prompt(lua_state, multi))) != nullptr)
     {
         // Use readline history and delete the allocated memory.
         std::string line = readline_buffer;
@@ -74,6 +86,9 @@ int main(void)
 
             multi = false;
             multiline_buffer = "";
+
+            // Perform garbage collecting.
+            lua_gc(lua_state, LUA_GCCOLLECT, 0);
         }
         else
         {

@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "../settings.h"
+#include "../util.h"
 #include "jira_components.h"
 
 JiraComponents::JiraComponents(const std::string &project_name)
@@ -12,8 +13,12 @@ JiraComponents::JiraComponents(const std::string &project_name)
     int position = 0;
     bool more_pages = true;
 
+    ProgressBar progress;
+
     while (more_pages)
     {
+        progress.tick();
+
         auto url = fmt::format("{}/rest/api/2/project/{}/component?startAt={}",
             settings.jira_server,
             project_name,

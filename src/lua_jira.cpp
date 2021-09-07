@@ -37,8 +37,7 @@ static int run_jql(lua_State* lua_state)
 
         if (Settings::get_instance().verbose)
         {
-            fmt::print(fg(fmt::color::light_green),
-                        "Successfully loaded {} keys.", index);
+            fmt::print(fg(fmt::color::light_green), "Successfully loaded {} keys.", index);
             fmt::print("\n");
         }
 
