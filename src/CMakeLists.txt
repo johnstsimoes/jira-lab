@@ -6,7 +6,7 @@ include(FetchContent)
 Set(FETCHCONTENT_QUIET FALSE)
 FetchContent_Declare(
     LibStein
-    GIT_REPOSITORY "git@github.com:johnstsimoes/libstein.git"
+    GIT_REPOSITORY "https://github.com/johnstsimoes/libstein.git"
     GIT_PROGRESS TRUE)
 FetchContent_MakeAvailable(LibStein)
 include_directories(${LibStein_SOURCE_DIR}/include)

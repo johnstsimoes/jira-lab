@@ -7,6 +7,6 @@ find_package(fmt CONFIG REQUIRED)
 
 add_subdirectory(src)
 
-enable_testing()
+# enable_testing()
 include_directories(src)
-add_subdirectory(tests)
+# add_subdirectory(tests)

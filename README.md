@@ -42,6 +42,27 @@ end
 
 ## Building
 
+### Building with Docker
+
+To avoid installing libraries and dependencies on your machine, you can build with:
+
+```
+https://github.com/johnstsimoes/jira-lab.git
+docker build .
+```
+
+and to execute (use `docker image ps` to find the image ID):
+
+```
+docker run -it <build id> bash
+export JIRA_USER=<your Jira user>
+export JIRA_TOKEN=<your Jira API token>
+export JIRA_HOST=<your Jira server address>
+jira-lab
+```
+
+### Tradicional build
+
 Ensure libraries are installed: `googletest`, `cpr`, `nlohmann-json` and `fmt`. For example, in Mac OS:
 
 ```
@@ -53,7 +74,7 @@ brew install nlohmann-json
 To build:
 
 ```
-git clone git@github.com:johnstsimoes/jira-lab.git
+git clone https://github.com/johnstsimoes/jira-lab.git
 cmake -S . -B build/
 cmake --build build/
 ctest --test-dir build/ --output-on-failure --verbose
