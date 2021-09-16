@@ -17,9 +17,9 @@ jira-lab < luascript.lua
 
 The following environment variables *must be set*:
 
-* JIRA_USER: your username on Atlassian Jira.
-* JIRA_TOKEN: an API token.
-* JIRA_HOST: the address of your Jira instance.
+* `JIRA_USER`: your username on Atlassian Jira.
+* `JIRA_TOKEN`: an API token.
+* `JIRA_HOST`: the address of your Jira instance.
 
 The script below will print out the keys resulting from a JQL query:
 
@@ -47,7 +47,8 @@ end
 To avoid installing libraries and dependencies on your machine, you can build with:
 
 ```
-https://github.com/johnstsimoes/jira-lab.git
+git clone https://github.com/johnstsimoes/jira-lab.git
+cd jira-lab
 docker build .
 ```
 
