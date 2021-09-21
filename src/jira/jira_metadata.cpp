@@ -1,53 +1,47 @@
 #include <libstein.h>
 
 #include <fmt/format.h>
+#include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 
 #include "../settings.h"
 #include "../util.h"
-#include "jira_jql.h"
+#include "jira_metadata.h"
 
-JiraJQL::JiraJQL(const std::string &jql)
+JiraMetadata::JiraMetadata()
 {
     auto &settings = Settings::get_instance();
 
     int position = 0;
     bool more_pages = true;
 
-    ProgressBar progress;
+    ProgressBar progress("metadata");
 
     while (more_pages)
     {
-        auto url = fmt::format("{}/rest/api/2/search?jql={}&fields=key&startAt={}",
+        auto url = fmt::format("{}/rest/api/2/field/search?startAt={}",
             settings.jira_server,
-            libstein::stringutils::url_encode(jql),
             position);
 
         libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
-
         progress.tick(response.is_cached());
 
         if (response.status_code() == 200)
         {
             auto json = nlohmann::json::parse(response.body());
 
-            for (const auto& issue : json["issues"])
+            for (const auto& entry: json["values"])
             {
-                keys_.push_back( issue["key"]);
+                auto id = entry["id"];
+                auto field_name = entry["name"];
+                fields_[id] = field_name;
             }
 
             int startAt = json["startAt"];
-            int total = json["total"];
-            int issues = json["issues"].size();
+            int retrieved = json["values"].size();
 
-            if (startAt + issues >= total)
-            {
-                more_pages = false;
-            }
-            else
-            {
-                position += issues;
-            }
+            more_pages = !(json["isLast"]);
+            position += retrieved;
         }
         else
         {
@@ -57,9 +51,4 @@ JiraJQL::JiraJQL(const std::string &jql)
                 ).dump(2));
         }
     }
-}
-
-std::vector<std::string> JiraJQL::get_keys()
-{
-    return this->keys_;
 }

@@ -49,13 +49,13 @@ To avoid installing libraries and dependencies on your machine, you can build wi
 ```
 git clone https://github.com/johnstsimoes/jira-lab.git
 cd jira-lab
-docker build .
+docker build . -t jira-lab
 ```
 
-and to execute (use `docker image ps` to find the image ID):
+and to execute:
 
 ```
-docker run -it <build id> bash
+docker run -it jira-lab
 export JIRA_USER=<your Jira user>
 export JIRA_TOKEN=<your Jira API token>
 export JIRA_HOST=<your Jira server address>

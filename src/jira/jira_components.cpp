@@ -1,6 +1,6 @@
 #include <fmt/format.h>
-#include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
+#include <libstein.h>
 
 #include "../settings.h"
 #include "../util.h"
@@ -24,12 +24,11 @@ JiraComponents::JiraComponents(const std::string &project_name)
             project_name,
             position);
 
-        cpr::Response response = cpr::Get(cpr::Url{url},
-                        cpr::Authentication{settings.jira_user, settings.jira_key});
+        libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
 
-        if (response.status_code == 200)
+        if (response.status_code() == 200)
         {
-            auto json = nlohmann::json::parse(response.text);
+            auto json = nlohmann::json::parse(response.body());
 
             for (const auto& entry : json["values"])
             {
@@ -46,7 +45,7 @@ JiraComponents::JiraComponents(const std::string &project_name)
         {
             throw std::invalid_argument(
                 nlohmann::json::parse(
-                    fmt::format("{{\"status_code\": {}, \"response\": {}}}", response.status_code, response.text)
+                    fmt::format("{{\"status_code\": {}, \"response\": {}}}", response.status_code(), response.body())
                 ).dump(2));
         }
     }

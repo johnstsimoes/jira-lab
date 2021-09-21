@@ -1,12 +1,19 @@
 #pragma once
 
+#include <string>
+#include <ctime>
+
 void print_error(const std::string &error_message);
+void print_warning(const std::string &warning_message);
+void print_successfully_loaded(int amount, const std::string &what);
 
 class ProgressBar
 {
 public:
-    ProgressBar();
+    ProgressBar(std::string what = "");
     ~ProgressBar();
 
-    void tick();
+    void tick(bool is_cached = false);
 };
+
+const std::tm jira_parse_date(const std::string& date);

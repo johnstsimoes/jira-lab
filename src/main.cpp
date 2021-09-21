@@ -13,7 +13,10 @@ extern "C"
 #include <readline/history.h>
 
 #include "util.h"
+#include "jira/jira_metadata.h"
 #include "lua_jira.h"
+
+#define COMMAND_HISTORY_FILE ".jira-lab-history"
 
 char* get_prompt(lua_State *lua_state, bool multi)
 {
@@ -26,17 +29,13 @@ char* get_prompt(lua_State *lua_state, bool multi)
     return buffer;
 }
 
-int main(void)
+void lua_loop()
 {
-    fmt::print(fg(fmt::color::light_green) |
-               bg(fmt::color::green) |
-               fmt::emphasis::bold,
-               "Jira Lab v0.1");
-
-    fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
-
     // Avoid file tab completion.
     rl_bind_key('\t', rl_insert);
+
+    // Use command history.
+    read_history(COMMAND_HISTORY_FILE);
 
     // Initialize Lua VM context.
     lua_State *lua_state = luaL_newstate();
@@ -45,8 +44,6 @@ int main(void)
     luaL_openlibs (lua_state);
 
     LuaJira::register_functions(lua_state);
-
-    // register_lua_functions (lua_state);
 
     /*
      * Read standard input and execute each line in Lua VM.
@@ -61,8 +58,11 @@ int main(void)
     {
         // Use readline history and delete the allocated memory.
         std::string line = readline_buffer;
-        if (strlen(readline_buffer) > 0)
-            add_history(readline_buffer);
+        if (strlen(readline_buffer) == 0) continue;
+
+        add_history(readline_buffer);
+        write_history(COMMAND_HISTORY_FILE);
+
         free(readline_buffer);
 
         multiline_buffer += line;
@@ -113,6 +113,37 @@ int main(void)
     }
 
     lua_close(lua_state);
+}
+
+std::string highlight(std::string text)
+{
+    return fmt::format(fg(fmt::color::gray) | fmt::emphasis::bold, text);
+}
+
+int main(void)
+{
+    fmt::print(fg(fmt::color::light_green) |
+               bg(fmt::color::green) |
+               fmt::emphasis::bold,
+               "Jira Lab v0.1");
+
+    fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
+
+    try
+    {
+        auto &metadata = JiraMetadata::get_instance();
+
+        lua_loop();
+    }
+    catch(const std::exception& e)
+    {
+        print_error(e.what());
+        print_error("Could not load metadata - please check if environment settings are correct.\n");
+
+        fmt::print("    {}: login name, usually an email address\n", highlight("JIRA_USER"));
+        fmt::print("    {}: Jira API token\n", highlight("JIRA_TOKEN"));
+        fmt::print("    {}: Jira instance address\n\n", highlight("JIRA_HOST"));
+    }
 
     return EXIT_SUCCESS;
 }

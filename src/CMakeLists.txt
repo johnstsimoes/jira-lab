@@ -1,5 +1,4 @@
 find_package(fmt CONFIG REQUIRED)
-find_library(LIB_CPR cpr)
 
 #----- Include LibStein
 include(FetchContent)
@@ -16,7 +15,9 @@ add_executable(${PROJECT_NAME}
     util.cpp
     settings.cpp
     lua_jira.cpp
+    jira/jira_changes.cpp
     jira/jira_components.cpp
+    jira/jira_metadata.cpp
     jira/jira_jql.cpp)
 
 target_link_libraries(${PROJECT_NAME}
@@ -25,5 +26,7 @@ target_link_libraries(${PROJECT_NAME}
     fmt::fmt
     LibStein
     readline
+    hiredis
+    cpr
     lua)
     # ${PROJECT_NAME}_lib)
