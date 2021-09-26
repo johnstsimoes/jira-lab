@@ -18,7 +18,9 @@ add_executable(${PROJECT_NAME}
     jira/jira_changes.cpp
     jira/jira_components.cpp
     jira/jira_metadata.cpp
-    jira/jira_jql.cpp)
+    jira/jira_jql.cpp
+    jira/jira_ticket.cpp
+    json_to_lua.cpp)
 
 target_link_libraries(${PROJECT_NAME}
     LINK_PUBLIC

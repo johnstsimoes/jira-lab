@@ -9,6 +9,9 @@
 #include "jira/jira_components.h"
 #include "jira/jira_metadata.h"
 #include "jira/jira_changes.h"
+#include "jira/jira_ticket.h"
+
+#include "json_to_lua.h"
 
 static int run_jql(lua_State* lua_state)
 {
@@ -157,6 +160,35 @@ static int get_changes(lua_State* lua_state)
     return 1;
 }
 
+static int get_ticket(lua_State* lua_state)
+{
+    // The arguments are ticket key and field.
+    if (    (lua_gettop(lua_state) != 1)
+        ||  (lua_type(lua_state, 1) != LUA_TSTRING))
+    {
+        print_warning("Usage: Jira.Load(string: ticket key)");
+        return luaL_typeerror(lua_state, 1, "string");
+    }
+
+    const char* luavalue_key = lua_tostring(lua_state, 1);
+
+    JiraTicket ticket(luavalue_key);
+    auto ticket_fields = ticket.get_fields();
+
+    lua_newtable(lua_state);
+    for (auto& entry : ticket_fields)
+    {
+        // Add field
+        lua_pushstring(lua_state, entry.first.c_str());
+
+        JsonToLua parser(lua_state, nlohmann::json::parse(entry.second), false, false);
+
+        lua_settable(lua_state, -3);
+    }
+
+    return 1;
+}
+
 void LuaJira::register_functions(lua_State* lua_state)
 {
     const luaL_Reg table_definition[] =
@@ -165,6 +197,7 @@ void LuaJira::register_functions(lua_State* lua_state)
         {"Components", get_components},
         {"Fields", get_fields},
         {"Changes", get_changes},
+        {"Load", get_ticket},
         {NULL, NULL}
     };
 
