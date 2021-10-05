@@ -64,10 +64,10 @@ jira-lab
 
 ### Tradicional build
 
-Ensure libraries are installed: `googletest`, `cpr`, `nlohmann-json` and `fmt`. For example, in Mac OS:
+Ensure libraries are installed: `googletest`, `cpr`, `nlohmann-json`, `hiredis`, and `fmt`. For example, in Mac OS:
 
 ```
-brew install googletest fmt cpr
+brew install googletest fmt cpr hiredis
 brew tap nlohmann-json
 brew install nlohmann-json
 ```

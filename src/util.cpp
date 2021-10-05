@@ -16,7 +16,7 @@ void print_error(const std::string &error_message)
 
 void print_successfully_loaded(int amount, const std::string &what)
 {
-    fmt::print(fg(fmt::color::light_green), "Successfully loaded {} {}.\n", what, amount);
+    fmt::print(fg(fmt::color::light_green), "Successfully loaded {} {}.\n", amount, what);
 }
 
 ProgressBar::ProgressBar(std::string what)
