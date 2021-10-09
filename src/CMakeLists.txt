@@ -1,5 +1,3 @@
-find_package(fmt CONFIG REQUIRED)
-
 #----- Include LibStein
 include(FetchContent)
 Set(FETCHCONTENT_QUIET FALSE)
@@ -24,11 +22,10 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     LINK_PUBLIC
-    ${LIB_CPR}
     fmt::fmt
+    curl
     LibStein
     readline
     hiredis
-    cpr
     lua)
     # ${PROJECT_NAME}_lib)

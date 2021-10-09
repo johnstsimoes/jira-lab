@@ -21,7 +21,7 @@ public:
     bool autorun = false;
     bool localmode = false;
 
-    // int delay_ms = 400; // TODO implement delay to avoid blacklisting
+    int delay_ms = 400;
 
     Settings (Settings const&) = delete;
     void operator= (Settings const&) = delete;

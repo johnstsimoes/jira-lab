@@ -10,10 +10,6 @@ JiraTicket::JiraTicket(const std::string &key)
 {
     auto &settings = Settings::get_instance();
 
-    const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog",
-        settings.jira_server,
-        key);
-
     int position = 0;
     bool more_pages = true;
 
@@ -21,6 +17,11 @@ JiraTicket::JiraTicket(const std::string &key)
 
     while (more_pages)
     {
+        const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog&startAt={}",
+            settings.jira_server,
+            key,
+            position);
+
         libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
 
         if (response.status_code() == 200)

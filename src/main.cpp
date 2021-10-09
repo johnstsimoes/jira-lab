@@ -34,8 +34,7 @@ char* get_prompt(lua_State *lua_state, bool multi)
 void load_library(lua_State *lua_state, const char* name, lua_CFunction function)
 {
     lua_pushcfunction(lua_state, function);
-    lua_pushstring(lua_state, name);
-    lua_call(lua_state, 1, 0);
+    lua_setglobal(lua_state, name);
 }
 
 void lua_loop()
@@ -51,21 +50,24 @@ void lua_loop()
     // Initialize Lua VM context.
     lua_State *lua_state = luaL_newstate();
 
-    // Load libraries on Lua.
-    load_library(lua_state, "", luaopen_base);
-    load_library(lua_state, LUA_TABLIBNAME, luaopen_table);
-    load_library(lua_state, LUA_STRLIBNAME, luaopen_string);
-    load_library(lua_state, LUA_MATHLIBNAME, luaopen_math);
-    load_library(lua_state, LUA_LOADLIBNAME, luaopen_package);
-    load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
+    // // Load libraries on Lua.
+    // load_library(lua_state, "", luaopen_base);
+    // load_library(lua_state, LUA_TABLIBNAME, luaopen_table);
+    // load_library(lua_state, LUA_STRLIBNAME, luaopen_string);
+    // load_library(lua_state, LUA_MATHLIBNAME, luaopen_math);
+    // load_library(lua_state, LUA_LOADLIBNAME, luaopen_package);
+    // load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
 
-    if (settings.localmode)
-    {
-        // luaopen_coroutine
-        // luaopen_io
-        // luaopen_os
-        // luaopen_utf8
-    }
+    // if (settings.localmode)
+    // {
+    //     // luaopen_coroutine
+    //     // luaopen_io
+    //     // luaopen_os
+    //     // luaopen_utf8
+    // }
+
+    // Load all default libraries on Lua.
+    luaL_openlibs (lua_state);
 
     LuaJira::register_functions(lua_state);
 

@@ -1,8 +1,8 @@
 #include <libstein.h>
 
 #include <fmt/format.h>
-#include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
+#include <libstein.h>
 
 #include "../settings.h"
 #include "../util.h"

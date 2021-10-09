@@ -10,10 +10,6 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
 {
     auto &settings = Settings::get_instance();
 
-    const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog",
-        settings.jira_server,
-        key);
-
     int position = 0;
     bool more_pages = true;
 
@@ -21,6 +17,11 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
 
     while (more_pages)
     {
+        const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog&startAt={}",
+            settings.jira_server,
+            key,
+            position);
+
         libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
 
         if (response.status_code() == 200)
@@ -72,8 +73,8 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
             else
             {
                 position += issues;
+                print_warning(fmt::format("now page starting at={}", position));
             }
-
         }
         else
         {
