@@ -7,14 +7,12 @@
 
 void print_warning(const std::string &warning_message)
 {
-    if (Settings::get_instance().verbose)
-        fmt::print(fg(fmt::color::salmon), "{}\n", warning_message);
+    fmt::print(fg(fmt::color::salmon), "{}\n", warning_message);
 }
 
 void print_error(const std::string &error_message)
 {
-    if (Settings::get_instance().verbose)
-        fmt::print(fg(fmt::color::red), "{}\n", error_message);
+    fmt::print(fg(fmt::color::red), "{}\n", error_message);
 }
 
 void print_successfully_loaded(int amount, const std::string &what)

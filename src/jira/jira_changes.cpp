@@ -73,7 +73,6 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
             else
             {
                 position += issues;
-                print_warning(fmt::format("now page starting at={}", position));
             }
         }
         else
@@ -84,6 +83,11 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
                 ).dump(2));
         }
     }
+
+    std::sort(this->results_.begin(), this->results_.end(), [](JiraChangesEntry& first, JiraChangesEntry& second)
+    {
+        return (std::mktime(&first.timestamp) < (std::mktime(&second.timestamp)));
+    });
 }
 
 std::vector<JiraChangesEntry> JiraChanges::get_results()

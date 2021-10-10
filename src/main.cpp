@@ -160,6 +160,7 @@ std::string highlight(std::string text)
 
 int main(int argc, char **argv)
 {
+    libstein::CachedRest::is_delay_milisseconds = 0;
     libstein::Arguments args(argc, argv);
     libstein::CommandLine cmd;
 
@@ -167,6 +168,7 @@ int main(int argc, char **argv)
         .parameter("a,autorun","Initial script to load.", false)
         .parameter("s,scriptmode","Disable interactions and run on script-only mode.", false)
         .parameter("l,localmode","Enable default libraries - UNSAFE in servers.", false)
+        .parameter("n,nocache","Disable caching in local Redis.", false)
         .eval(args);
 
     if (!results.valid)
@@ -178,6 +180,8 @@ int main(int argc, char **argv)
     }
 
     Settings &settings = Settings::get_instance();
+
+    libstein::CachedRest::is_redis_enabled = !cmd.isSet("n");
 
     if (cmd.isSet("s"))
     {

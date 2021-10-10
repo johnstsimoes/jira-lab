@@ -10,51 +10,29 @@ JiraTicket::JiraTicket(const std::string &key)
 {
     auto &settings = Settings::get_instance();
 
-    int position = 0;
-    bool more_pages = true;
+    const auto url = fmt::format("{}/rest/api/2/issue/{}",
+        settings.jira_server,
+        key);
 
-    ProgressBar progress;
+    libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
 
-    while (more_pages)
+    if (response.status_code() == 200)
     {
-        const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog&startAt={}",
-            settings.jira_server,
-            key,
-            position);
+        auto json = nlohmann::json::parse(response.body());
 
-        libstein::CachedRest response = libstein::CachedRest(url, settings.jira_user, settings.jira_key);
+        auto fields = json["fields"];
 
-        if (response.status_code() == 200)
+        for (auto& entry : fields.items())
         {
-            auto json = nlohmann::json::parse(response.body());
-
-            auto fields = json["fields"];
-
-            for (auto& entry : fields.items())
-            {
-                this->fields_[entry.key()] = entry.value().dump(2);
-            }
-
-            int startAt = json["changelog"]["startAt"];
-            int total = json["changelog"]["total"];
-            int issues = json["changelog"]["histories"].size();
-
-            if (startAt + issues >= total)
-            {
-                more_pages = false;
-            }
-            else
-            {
-                position += issues;
-            }
+            this->fields_[entry.key()] = entry.value().dump(2);
         }
-        else
-        {
-            throw std::invalid_argument(
-                nlohmann::json::parse(
-                    fmt::format("{{\"status_code\": {}, \"response\": {}}}", response.status_code(), response.body())
-                ).dump(2));
-        }
+    }
+    else
+    {
+        throw std::invalid_argument(
+            nlohmann::json::parse(
+                fmt::format("{{\"status_code\": {}, \"response\": {}}}", response.status_code(), response.body())
+            ).dump(2));
     }
 }
 

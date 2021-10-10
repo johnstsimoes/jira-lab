@@ -161,7 +161,7 @@ static int get_changes(lua_State* lua_state)
     return 1;
 }
 
-static int get_ticket(lua_State* lua_state)
+static int get_load(lua_State* lua_state)
 {
     // The arguments are ticket key and field.
     if (    (lua_gettop(lua_state) != 1)
@@ -181,7 +181,6 @@ static int get_ticket(lua_State* lua_state)
     {
         // Add field
         lua_pushstring(lua_state, entry.first.c_str());
-
         JsonToLua parser(lua_state, nlohmann::json::parse(entry.second), false, false);
 
         lua_settable(lua_state, -3);
@@ -201,9 +200,12 @@ static int set_verbose(lua_State* lua_state)
 
     bool enabled = lua_toboolean(lua_state, 1);
 
+    bool old_value = Settings::get_instance().verbose;
     Settings::get_instance().verbose = enabled;
 
-    return 0;
+    lua_pushboolean(lua_state, old_value);
+
+    return 1;
 }
 
 static int set_delay(lua_State* lua_state)
@@ -222,6 +224,24 @@ static int set_delay(lua_State* lua_state)
     return 0;
 }
 
+static int parse_date(lua_State* lua_state)
+{
+    if (    (lua_gettop(lua_state) != 1)
+        ||  (lua_type(lua_state, 1) != LUA_TSTRING))
+    {
+        print_warning("Usage: Jira.ParseDate(string: date in format YYYY-MM-ddTHH:MM:SS)");
+        return luaL_typeerror(lua_state, 1, "string");
+    }
+
+    const char* date = lua_tostring(lua_state, 1);
+
+    std::tm parsed = jira_parse_date(date);
+
+    lua_pushinteger(lua_state, std::mktime(&parsed));
+
+    return 1;
+}
+
 void LuaJira::register_functions(lua_State* lua_state)
 {
     const luaL_Reg table_definition[] =
@@ -230,9 +250,10 @@ void LuaJira::register_functions(lua_State* lua_state)
         {"Components", get_components},
         {"Fields", get_fields},
         {"Changes", get_changes},
-        {"Load", get_ticket},
+        {"Load", get_load},
         {"Verbose", set_verbose},
         {"Delay", set_delay},
+        {"ParseDate", parse_date},
         {NULL, NULL}
     };
 

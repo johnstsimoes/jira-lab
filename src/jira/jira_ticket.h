@@ -11,5 +11,4 @@ public:
     JiraTicket(const std::string &key);
 
     std::map<std::string, std::string> get_fields();
-
 };
