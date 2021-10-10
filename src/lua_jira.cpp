@@ -1,5 +1,6 @@
 #include <string>
 #include <ctime>
+#include <libstein.h>
 
 #include "lua_jira.h"
 #include "util.h"
@@ -189,6 +190,38 @@ static int get_ticket(lua_State* lua_state)
     return 1;
 }
 
+static int set_verbose(lua_State* lua_state)
+{
+    if (    (lua_gettop(lua_state) != 1)
+        ||  (lua_type(lua_state, 1) != LUA_TBOOLEAN))
+    {
+        print_warning("Usage: Jira.Verbose(bool: interactive feedback)");
+        return luaL_typeerror(lua_state, 1, "boolean");
+    }
+
+    bool enabled = lua_toboolean(lua_state, 1);
+
+    Settings::get_instance().verbose = enabled;
+
+    return 0;
+}
+
+static int set_delay(lua_State* lua_state)
+{
+    if (    (lua_gettop(lua_state) != 1)
+        ||  (lua_type(lua_state, 1) != LUA_TNUMBER))
+    {
+        print_warning("Usage: Jira.Delay(number: time in milisseconds)");
+        return luaL_typeerror(lua_state, 1, "number");
+    }
+
+    int delay = lua_tonumber(lua_state, 1);
+
+    libstein::CachedRest::is_delay_milisseconds = delay;
+
+    return 0;
+}
+
 void LuaJira::register_functions(lua_State* lua_state)
 {
     const luaL_Reg table_definition[] =
@@ -198,6 +231,8 @@ void LuaJira::register_functions(lua_State* lua_state)
         {"Fields", get_fields},
         {"Changes", get_changes},
         {"Load", get_ticket},
+        {"Verbose", set_verbose},
+        {"Delay", set_delay},
         {NULL, NULL}
     };
 

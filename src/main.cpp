@@ -20,15 +20,15 @@ extern "C"
 
 #define COMMAND_HISTORY_FILE ".jira-lab-history"
 
-char* get_prompt(lua_State *lua_state, bool multi)
+char* get_prompt(lua_State *lua_state, bool multi, bool verbose)
 {
     static char buffer[256];
+    static char empty[] = "";
 
     int used_memory = lua_gc(lua_state, LUA_GCCOUNT, 0);
-
     sprintf(buffer, "[%d kb]%s", used_memory, (multi? ">>": ">"));
 
-    return buffer;
+    return verbose ? buffer : empty;
 }
 
 void load_library(lua_State *lua_state, const char* name, lua_CFunction function)
@@ -73,7 +73,8 @@ void lua_loop()
 
     if (settings.autorun)
     {
-        fmt::print("Loading {}...\n", settings.autorun_filename);
+        if (settings.verbose)
+            fmt::print("Loading {}...\n", settings.autorun_filename);
 
         if (LUA_OK != luaL_loadfile(lua_state, settings.autorun_filename.c_str()) ||
                       lua_pcall(lua_state, 0, 0, 0))
@@ -91,7 +92,7 @@ void lua_loop()
 
     char* readline_buffer;
 
-    while ( (readline_buffer = readline(get_prompt(lua_state, multi))) != nullptr)
+    while ( (readline_buffer = readline(get_prompt(lua_state, multi, settings.verbose))) != nullptr)
     {
         // Use readline history and delete the allocated memory.
         std::string line = readline_buffer;
@@ -178,18 +179,26 @@ int main(int argc, char **argv)
 
     Settings &settings = Settings::get_instance();
 
-    if (cmd.hasValue("s"))
+    if (cmd.isSet("s"))
     {
-        settings.autorun = true;
-        settings.autorun_filename = cmd.getValue("s");
+        settings.verbose = false;
     }
 
-    fmt::print(fg(fmt::color::light_green) |
-               bg(fmt::color::green) |
-               fmt::emphasis::bold,
-               "Jira Lab v0.1");
+    if (cmd.hasValue("a"))
+    {
+        settings.autorun = true;
+        settings.autorun_filename = cmd.getValue("a");
+    }
 
-    fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
+    if (settings.verbose)
+    {
+        fmt::print(fg(fmt::color::light_green) |
+                bg(fmt::color::green) |
+                fmt::emphasis::bold,
+                "Jira Lab v0.1");
+
+        fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
+    }
 
     try
     {
