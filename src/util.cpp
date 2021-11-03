@@ -65,5 +65,8 @@ const std::tm jira_parse_date(const std::string& date)
         throw std::runtime_error("failed to parse time string");
     }
 
+    // Let system decide - not recommended usually.
+    parsed.tm_isdst = -1;
+
     return parsed;
 }
