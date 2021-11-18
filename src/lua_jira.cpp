@@ -1,6 +1,7 @@
 #include <string>
 #include <ctime>
 #include <libstein.h>
+#include <fmt/core.h>
 
 #include "lua_jira.h"
 #include "util.h"

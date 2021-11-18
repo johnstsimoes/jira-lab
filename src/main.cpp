@@ -33,67 +33,38 @@ char* get_prompt(lua_State *lua_state, bool multi, bool verbose)
 
 void load_library(lua_State *lua_state, const char* name, lua_CFunction function)
 {
-    lua_pushcfunction(lua_state, function);
-    lua_setglobal(lua_state, name);
+    luaL_requiref(lua_state, name, function, 1);
+    lua_pop(lua_state, 1);
 }
 
-void lua_loop()
+void lua_loop(lua_State *lua_state)
 {
     Settings &settings = Settings::get_instance();
-
-    // Avoid file tab completion.
-    rl_bind_key('\t', rl_insert);
-
-    // Use command history.
-    read_history(COMMAND_HISTORY_FILE);
-
-    // Initialize Lua VM context.
-    lua_State *lua_state = luaL_newstate();
-
-    // // Load libraries on Lua.
-    // load_library(lua_state, "", luaopen_base);
-    // load_library(lua_state, LUA_TABLIBNAME, luaopen_table);
-    // load_library(lua_state, LUA_STRLIBNAME, luaopen_string);
-    // load_library(lua_state, LUA_MATHLIBNAME, luaopen_math);
-    // load_library(lua_state, LUA_LOADLIBNAME, luaopen_package);
-    // load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
-
-    // if (settings.localmode)
-    // {
-    //     // luaopen_coroutine
-    //     // luaopen_io
-    //     // luaopen_os
-    //     // luaopen_utf8
-    // }
-
-    // Load all default libraries on Lua.
-    luaL_openlibs (lua_state);
-
-    LuaJira::register_functions(lua_state);
-
-    if (settings.autorun)
-    {
-        if (settings.verbose)
-            fmt::print("Loading {}...\n", settings.autorun_filename);
-
-        if (LUA_OK != luaL_loadfile(lua_state, settings.autorun_filename.c_str()) ||
-                      lua_pcall(lua_state, 0, 0, 0))
-        {
-            print_error(lua_tostring(lua_state, -1));
-        }
-    }
 
     /*
      * Read standard input and execute each line in Lua VM.
      */
-    bool multi = false;
 
+    bool multi = false;
+    char* readline_buffer;
     std::string multiline_buffer = "";
 
-    char* readline_buffer;
-
-    while ( (readline_buffer = readline(get_prompt(lua_state, multi, settings.verbose))) != nullptr)
+    while (true)
     {
+        printf("\e[?25h"); // Display the cursor
+
+        // Build prompt.
+        static char buffer[64];
+        static char empty[] = "";
+        int used_memory = lua_gc(lua_state, LUA_GCCOUNT, 0);
+        sprintf(buffer, "[%d kb]%s", used_memory, (multi? ">>": ">"));
+
+        readline_buffer = readline(settings.verbose ? buffer : empty);
+
+        printf("\e[?25l"); // Hide the cursor
+        if (readline_buffer == nullptr)
+            break;
+
         // Use readline history and delete the allocated memory.
         std::string line = readline_buffer;
         if (strlen(readline_buffer) == 0) continue;
@@ -206,9 +177,49 @@ int main(int argc, char **argv)
 
     try
     {
+        // Avoid file tab completion.
+        rl_bind_key('\t', rl_insert);
+
+        // Use command history.
+        read_history(COMMAND_HISTORY_FILE);
+
+        // Initialize Lua VM context.
+        lua_State *lua_state = luaL_newstate();
+
+        // Load libraries on Lua.
+        load_library(lua_state, "", luaopen_base);
+        load_library(lua_state, LUA_TABLIBNAME, luaopen_table);
+        load_library(lua_state, LUA_STRLIBNAME, luaopen_string);
+        load_library(lua_state, LUA_MATHLIBNAME, luaopen_math);
+        load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
+        load_library(lua_state, LUA_UTF8LIBNAME, luaopen_utf8);
+
+        // If in local mode, load more 'dangerous' libraries (that could give access to the file system remotely, for example).
+        if (settings.localmode)
+        {
+            load_library(lua_state, LUA_OSLIBNAME, luaopen_os);
+            load_library(lua_state, LUA_IOLIBNAME, luaopen_io);
+            load_library(lua_state, LUA_LOADLIBNAME, luaopen_package);
+        }
+
+        LuaJira::register_functions(lua_state);
+
         auto &metadata = JiraMetadata::get_instance();
 
-        lua_loop();
+        Settings &settings = Settings::get_instance();
+        if (settings.autorun)
+        {
+            if (settings.verbose)
+                fmt::print("Loading {}...\n", settings.autorun_filename);
+
+            if (LUA_OK != luaL_loadfile(lua_state, settings.autorun_filename.c_str()) ||
+                        lua_pcall(lua_state, 0, 0, 0))
+            {
+                print_error(lua_tostring(lua_state, -1));
+            }
+        }
+
+        lua_loop(lua_state);
     }
     catch(const std::exception& e)
     {

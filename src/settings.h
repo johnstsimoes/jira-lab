@@ -19,7 +19,7 @@ public:
     bool verbose = true;
     bool debug = false;
     bool autorun = false;
-    bool localmode = false;
+    bool localmode = true; // TODO set false as default for improved safety.
 
     Settings (Settings const&) = delete;
     void operator= (Settings const&) = delete;
