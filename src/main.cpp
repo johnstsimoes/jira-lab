@@ -15,7 +15,8 @@ extern "C"
 
 #include "util.h"
 #include "jira/jira_metadata.h"
-#include "lua_jira.h"
+#include "jira/lua_jira.h"
+#include "util/lua_util.h"
 #include "settings.h"
 
 #define COMMAND_HISTORY_FILE ".jira-lab-history"
@@ -203,6 +204,7 @@ int main(int argc, char **argv)
         }
 
         LuaJira::register_functions(lua_state);
+        LuaUtil::register_functions(lua_state);
 
         auto &metadata = JiraMetadata::get_instance();
 

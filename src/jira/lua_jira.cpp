@@ -3,17 +3,17 @@
 #include <libstein.h>
 #include <fmt/core.h>
 
+#include "../util.h"
+#include "../settings.h"
+#include "../json_to_lua.h"
+
 #include "lua_jira.h"
-#include "util.h"
-#include "settings.h"
+#include "jira_jql.h"
+#include "jira_components.h"
+#include "jira_metadata.h"
+#include "jira_changes.h"
+#include "jira_ticket.h"
 
-#include "jira/jira_jql.h"
-#include "jira/jira_components.h"
-#include "jira/jira_metadata.h"
-#include "jira/jira_changes.h"
-#include "jira/jira_ticket.h"
-
-#include "json_to_lua.h"
 
 static int run_jql(lua_State* lua_state)
 {

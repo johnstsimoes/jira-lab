@@ -13,7 +13,8 @@ add_library(${PROJECT_NAME}_lib "")
 target_sources(${PROJECT_NAME}_lib PUBLIC
     util.cpp
     settings.cpp
-    lua_jira.cpp
+    util/lua_util.cpp
+    jira/lua_jira.cpp
     jira/jira_changes.cpp
     jira/jira_components.cpp
     jira/jira_metadata.cpp
