@@ -14,7 +14,6 @@ extern "C"
 #include <libstein.h>
 
 #include "util.h"
-#include "jira/jira_metadata.h"
 #include "jira/lua_jira.h"
 #include "util/lua_util.h"
 #include "settings.h"
@@ -125,11 +124,6 @@ void lua_loop(lua_State *lua_state)
     lua_close(lua_state);
 }
 
-std::string highlight(std::string text)
-{
-    return fmt::format(fg(fmt::color::gray) | fmt::emphasis::bold, text);
-}
-
 int main(int argc, char **argv)
 {
     libstein::CachedRest::is_delay_milisseconds = 0;
@@ -171,7 +165,7 @@ int main(int argc, char **argv)
         fmt::print(fg(fmt::color::light_green) |
                 bg(fmt::color::green) |
                 fmt::emphasis::bold,
-                "Jira Lab v0.1");
+                "Jira Lab v0.2");
 
         fmt::print("\n2021 John Simoes - Vancouver, BC\n\n");
     }
@@ -206,8 +200,6 @@ int main(int argc, char **argv)
         LuaJira::register_functions(lua_state);
         LuaUtil::register_functions(lua_state);
 
-        auto &metadata = JiraMetadata::get_instance();
-
         Settings &settings = Settings::get_instance();
         if (settings.autorun)
         {
@@ -226,11 +218,6 @@ int main(int argc, char **argv)
     catch(const std::exception& e)
     {
         print_error(e.what());
-        print_error("Could not load metadata - please check if environment settings are correct.\n");
-
-        fmt::print("    {}: login name, usually an email address\n", highlight("JIRA_USER"));
-        fmt::print("    {}: Jira API token\n", highlight("JIRA_TOKEN"));
-        fmt::print("    {}: Jira instance address\n\n", highlight("JIRA_HOST"));
     }
 
     return EXIT_SUCCESS;

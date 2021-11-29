@@ -15,6 +15,11 @@ void print_error(const std::string &error_message)
     fmt::print(fg(fmt::color::red), "{}\n", error_message);
 }
 
+std::string color_highlight(const std::string &message)
+{
+    return fmt::format(fg(fmt::color::gray) | fmt::emphasis::bold, message);
+}
+
 void print_successfully_loaded(int amount, const std::string &what)
 {
     if (Settings::get_instance().verbose)

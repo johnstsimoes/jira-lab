@@ -265,4 +265,19 @@ void LuaJira::register_functions(lua_State* lua_state)
     lua_pushvalue(lua_state, -2);
     lua_rawset(lua_state, -3);
     lua_setglobal(lua_state, "Jira");
+
+    // Load Jira metadata.
+    try
+    {
+        JiraMetadata::get_instance();
+    }
+    catch(const std::exception& e)
+    {
+        print_error(e.what());
+        print_error("Could not load metadata - please check if environment settings are correct.\n");
+
+        fmt::print("    {}: login name, usually an email address\n", color_highlight("JIRA_USER"));
+        fmt::print("    {}: Jira API token\n", color_highlight("JIRA_TOKEN"));
+        fmt::print("    {}: Jira instance address\n\n", color_highlight("JIRA_HOST"));
+    }
 }
