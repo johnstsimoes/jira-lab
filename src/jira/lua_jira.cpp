@@ -151,10 +151,16 @@ static int get_changes(lua_State* lua_state)
         lua_pushinteger(lua_state, std::mktime(&entry.timestamp));
         lua_settable(lua_state, -3);
 
-        // New state
+        // New value
         lua_pushliteral(lua_state, "value");
-        lua_pushstring(lua_state, entry.state.c_str());
+        lua_pushstring(lua_state, entry.value.c_str());
         lua_settable(lua_state, -3);
+
+        // Old value
+        lua_pushliteral(lua_state, "old_value");
+        lua_pushstring(lua_state, entry.old_value.c_str());
+        lua_settable(lua_state, -3);
+
 
         lua_settable(lua_state, -3);
     }

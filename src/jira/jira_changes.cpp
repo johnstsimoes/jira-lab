@@ -47,11 +47,15 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
                         auto new_value = item["toString"];
                         if (new_value == nullptr) new_value = "null";
 
+                        auto old_value = item["fromString"];
+                        if (old_value == nullptr) old_value = "null";
+
                         // Add new entry to the vector
                         // when, new_value
                         JiraChangesEntry new_entry;
                         new_entry.timestamp = when;
-                        new_entry.state = new_value;
+                        new_entry.value = new_value;
+                        new_entry.old_value = old_value;
 
                         this->results_.push_back(new_entry);
                     }

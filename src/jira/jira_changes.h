@@ -6,7 +6,8 @@
 struct JiraChangesEntry
 {
     std::tm timestamp;
-    std::string state;
+    std::string value;
+    std::string old_value;
 };
 
 class JiraChanges
