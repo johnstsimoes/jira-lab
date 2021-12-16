@@ -17,7 +17,7 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
 
     while (more_pages)
     {
-        const auto url = fmt::format("{}/rest/api/2/issue/{}?expand=changelog&startAt={}",
+        const auto url = fmt::format("{}/rest/api/2/issue/{}/changelog?maxResults=100&startAt={}",
             settings.jira_server,
             key,
             position);
@@ -28,7 +28,7 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
         {
             auto json = nlohmann::json::parse(response.body());
             std::string line = "";
-            auto changes = json["changelog"]["histories"];
+            auto changes = json["values"];
             try
             {
                 for (auto& entry : changes)
@@ -66,18 +66,8 @@ JiraChanges::JiraChanges(const std::string &key, const std::string &field)
                 throw std::invalid_argument(fmt::format("Could not parse response:{}", line));
             }
 
-            int startAt = json["changelog"]["startAt"];
-            int total = json["changelog"]["total"];
-            int issues = json["changelog"]["histories"].size();
-
-            if (startAt + issues >= total)
-            {
-                more_pages = false;
-            }
-            else
-            {
-                position += issues;
-            }
+            more_pages = !json["isLast"];
+            position += json["values"].size();
         }
         else
         {
