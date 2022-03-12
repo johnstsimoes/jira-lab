@@ -1,13 +1,3 @@
-#----- Include libstein
-include(FetchContent)
-Set(FETCHCONTENT_QUIET FALSE)
-FetchContent_Declare(
-    libstein
-    GIT_REPOSITORY "https://github.com/johnstsimoes/libstein.git"
-    GIT_PROGRESS TRUE)
-FetchContent_MakeAvailable(libstein)
-include_directories(${libstein_SOURCE_DIR}/include)
-
 add_library(${PROJECT_NAME}_lib "")
 
 target_sources(${PROJECT_NAME}_lib PUBLIC
@@ -34,3 +24,9 @@ target_link_libraries(${PROJECT_NAME}
     hiredis
     lua
     ${PROJECT_NAME}_lib)
+
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
