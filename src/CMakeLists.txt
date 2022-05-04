@@ -4,6 +4,7 @@ target_sources(${PROJECT_NAME}_lib PUBLIC
     util.cpp
     settings.cpp
     util/lua_util.cpp
+    base/lua_base.cpp
     jira/lua_jira.cpp
     jira/jira_changes.cpp
     jira/jira_components.cpp

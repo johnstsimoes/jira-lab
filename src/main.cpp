@@ -1,5 +1,6 @@
 #include <string>
 #include <fmt/color.h>
+#include <iostream>
 
 extern "C"
 {
@@ -16,6 +17,7 @@ extern "C"
 #include "util.h"
 #include "jira/lua_jira.h"
 #include "util/lua_util.h"
+#include "base/lua_base.h"
 #include "settings.h"
 
 #define COMMAND_HISTORY_FILE ".jira-lab-history"
@@ -46,7 +48,7 @@ void lua_loop(lua_State *lua_state)
      */
 
     bool multi = false;
-    char* readline_buffer;
+    char* readline_buffer = nullptr;
     std::string multiline_buffer = "";
 
     while (true)
@@ -54,12 +56,13 @@ void lua_loop(lua_State *lua_state)
         printf("\e[?25h"); // Display the cursor
 
         // Build prompt.
-        static char buffer[64];
+        static char prompt_buffer[64];
         static char empty[] = "";
         int used_memory = lua_gc(lua_state, LUA_GCCOUNT, 0);
-        sprintf(buffer, "[%d kb]%s", used_memory, (multi? ">>": ">"));
+        sprintf(prompt_buffer, "[%d kb]>%s", used_memory, (multi? ">": ""));
 
-        readline_buffer = readline(settings.verbose ? buffer : empty);
+        std::cout << (settings.verbose? prompt_buffer : empty) << std::flush;
+        readline_buffer = readline("");//settings.verbose ? prompt_buffer : empty);
 
         printf("\e[?25l"); // Hide the cursor
         if (readline_buffer == nullptr)
@@ -71,7 +74,6 @@ void lua_loop(lua_State *lua_state)
 
         add_history(readline_buffer);
         write_history(COMMAND_HISTORY_FILE);
-
         free(readline_buffer);
 
         multiline_buffer += line;
@@ -186,19 +188,20 @@ int main(int argc, char **argv)
         load_library(lua_state, LUA_TABLIBNAME, luaopen_table);
         load_library(lua_state, LUA_STRLIBNAME, luaopen_string);
         load_library(lua_state, LUA_MATHLIBNAME, luaopen_math);
-        load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
+        // load_library(lua_state, LUA_DBLIBNAME, luaopen_debug);
         load_library(lua_state, LUA_UTF8LIBNAME, luaopen_utf8);
 
         // If in local mode, load more 'dangerous' libraries (that could give access to the file system remotely, for example).
         if (settings.localmode)
         {
             load_library(lua_state, LUA_OSLIBNAME, luaopen_os);
-            load_library(lua_state, LUA_IOLIBNAME, luaopen_io);
+            // load_library(lua_state, LUA_IOLIBNAME, luaopen_io);  // Security breach if left on
             load_library(lua_state, LUA_LOADLIBNAME, luaopen_package);
         }
 
         LuaJira::register_functions(lua_state);
         LuaUtil::register_functions(lua_state);
+        LuaBase::register_functions(lua_state);
 
         Settings &settings = Settings::get_instance();
         if (settings.autorun)

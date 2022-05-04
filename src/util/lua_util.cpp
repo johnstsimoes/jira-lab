@@ -3,6 +3,8 @@
 
 #include <string>
 #include <regex>
+#include <fmt/core.h>
+#include <iostream>
 
 static int regex(lua_State* lua_state)
 {
@@ -45,11 +47,27 @@ static int regex(lua_State* lua_state)
     return 1;
 }
 
+static int tick(lua_State* lua_state)
+{
+    if (    (lua_gettop(lua_state) != 1)
+        ||  (lua_type(lua_state, 1) != LUA_TSTRING))
+    {
+        print_warning("Usage: Util.Tick(string: print at the same line)");
+        return luaL_typeerror(lua_state, 1, "string");
+    }
+
+    fmt::print("{}", lua_tostring(lua_state, 1));
+    std::cout << std::flush;
+
+    return 0;
+}
+
 void LuaUtil::register_functions(lua_State* lua_state)
 {
     const luaL_Reg table_definition[] =
     {
         {"Regex", regex},
+        {"Tick", tick},
         {NULL, NULL}
     };
 
