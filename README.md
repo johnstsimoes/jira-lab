@@ -84,5 +84,5 @@ ctest --test-dir build/ --output-on-failure --verbose
 To install:
 
 ```
-sudo cp build/src/jira-lab /usr/local/bin
+cmake --install build/
 ```
